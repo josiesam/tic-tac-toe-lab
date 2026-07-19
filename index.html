@@ -43,6 +43,31 @@
         <p class="status" id="status" aria-live="polite">
           Player X starts. Each player gets 3 pieces.
         </p>
+
+        <div class="connect-panel" aria-label="Online game room">
+          <div class="mode-row">
+            <button id="localModeButton" type="button" class="mode-button active">
+              Local
+            </button>
+            <button id="createRoomButton" type="button" class="mode-button">
+              Create code
+            </button>
+          </div>
+          <div class="join-row">
+            <input
+              id="roomCodeInput"
+              type="text"
+              maxlength="6"
+              placeholder="Room code"
+              aria-label="Room code"
+            />
+            <button id="joinRoomButton" type="button">Join</button>
+          </div>
+          <p class="room-info" id="roomInfo" aria-live="polite">
+            Local game: two players use this board.
+          </p>
+        </div>
+
         <div class="board" id="board" aria-label="Tic-tac-toe board">
           <button
             class="cell"

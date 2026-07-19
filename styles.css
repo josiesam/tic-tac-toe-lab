@@ -146,6 +146,62 @@ h3 {
   font-weight: 700;
 }
 
+.connect-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 18px;
+  padding: 12px;
+}
+
+.mode-row,
+.join-row {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-row {
+  margin-bottom: 8px;
+}
+
+.mode-button,
+.join-row button {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--accent-strong);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.mode-button.active,
+.join-row button {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.join-row input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.room-info {
+  min-height: 20px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -162,10 +218,7 @@ h3 {
   font-size: clamp(2.6rem, 13vw, 5.4rem);
   font-weight: 800;
   line-height: 1;
-  transition:
-    transform 140ms ease,
-    border-color 140ms ease,
-    background 140ms ease;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
 }
 
 .cell:hover:not(:disabled),
@@ -253,6 +306,11 @@ h3 {
   }
 
   .controls {
+    flex-direction: column;
+  }
+
+  .mode-row,
+  .join-row {
     flex-direction: column;
   }
 }
