@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tic-Tac-Toe Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="game-panel" aria-labelledby="game-title">
+        <div class="title-row">
+          <div>
+            <p class="eyebrow">Coding challenge</p>
+            <h1 id="game-title">Tic-Tac-Toe Lab</h1>
+          </div>
+          <button
+            class="icon-button"
+            id="themeButton"
+            type="button"
+            aria-label="Change color theme"
+            title="Change color theme"
+          >
+            <span aria-hidden="true">◐</span>
+          </button>
+        </div>
+
+        <div class="scoreboard" aria-label="Scoreboard">
+          <div>
+            <span class="score-label">X</span>
+            <strong id="scoreX">0</strong>
+          </div>
+          <div>
+            <span class="score-label">Rounds</span>
+            <strong id="scoreRounds">0</strong>
+          </div>
+          <div>
+            <span class="score-label">O</span>
+            <strong id="scoreO">0</strong>
+          </div>
+        </div>
+
+        <p class="status" id="status" aria-live="polite">
+          Player X starts. Each player gets 3 pieces.
+        </p>
+        <div class="board" id="board" aria-label="Tic-tac-toe board">
+          <button
+            class="cell"
+            type="button"
+            data-cell="0"
+            aria-label="Top left square"
+          ></button>
+          <button
+            class="cell"
+            type="button"
+            data-cell="1"
+            aria-label="Top middle square"
+          ></button>
+          <button
+            class="cell"
+            type="button"
+            data-cell="2"
+            aria-label="Top right square"
+          ></button>
+          <button
+            class="cell"
+            type="button"
+            data-cell="3"
+            aria-label="Middle left square"
+          ></button>
+          <button
+            class="cell"
+            type="button"
+            data-cell="4"
+            aria-label="Center square"
+          ></button>
+          <button
+            class="cell"
+            type="button"
+            data-cell="5"
+            aria-label="Middle right square"
+          ></button>
+          <button
+            class="cell"
+            type="button"
+            data-cell="6"
+            aria-label="Bottom left square"
+          ></button>
+          <button
+            class="cell"
+            type="button"
+            data-cell="7"
+            aria-label="Bottom middle square"
+          ></button>
+          <button
+            class="cell"
+            type="button"
+            data-cell="8"
+            aria-label="Bottom right square"
+          ></button>
+        </div>
+
+        <div class="controls">
+          <button id="newRoundButton" type="button">New round</button>
+          <button id="resetButton" type="button">Reset score</button>
+        </div>
+      </section>
+
+      <!-- <aside class="thinking-panel" aria-labelledby="thinking-title">
+        <h2 id="thinking-title">Think Like a Game Designer</h2>
+        <ul>
+          <li>What move blocks your opponent?</li>
+          <li>What move creates two ways to win?</li>
+          <li>After 3 pieces, your oldest piece moves to your next square.</li>
+          <li>Can you predict which piece moves before you click?</li>
+        </ul>
+        <div class="challenge">
+          <h3>Creative upgrades</h3>
+          <p>
+            Try adding player names, a timer, sound effects, or a computer
+            opponent.
+          </p>
+        </div>
+      </aside> -->
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
