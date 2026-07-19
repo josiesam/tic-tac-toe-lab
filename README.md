@@ -30,10 +30,15 @@ The online room mode needs Vercel because it uses `/api/room`.
 
 1. Push these files to a GitHub repository.
 2. Create a new Vercel project from that GitHub repository.
-3. Deploy with the default Vercel settings.
-4. Player 1 opens the site and clicks `Create code`.
-5. Player 2 opens the same site, enters the code, and clicks `Join`.
+3. Add a Vercel Redis or Upstash Redis database.
+4. Add these environment variables in Vercel:
+   - `TIC_TAC_TOC_KV_REST_API_URL` and `TIC_TAC_TOC_KV_REST_API_TOKEN`
+   - `KV_REST_API_URL` and `KV_REST_API_TOKEN`
+   - or `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
+5. Redeploy the project.
+6. Player 1 opens the site and clicks `Create code`.
+7. Player 2 opens the same site, enters the code, and clicks `Join`.
 
 ## Beginner note
 
-This version stores rooms in server memory so the code stays small and readable. It is good for a simple class demo, but rooms can disappear if the server restarts. A stronger version would use a small database.
+The app uses Redis for hosted online rooms. If Redis is not configured, it falls back to memory for local learning, but memory rooms can disappear on Vercel between requests.

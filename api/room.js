@@ -13,17 +13,28 @@ const rooms = globalThis.ticTacToeRooms || new Map();
 globalThis.ticTacToeRooms = rooms;
 
 module.exports = async function handler(request, response) {
-  cleanOldRooms();
+  try {
+    return await handleRequest(request, response);
+  } catch (error) {
+    return sendError(response, 500, error.message || "Room server error.");
+  }
+};
+
+async function handleRequest(request, response) {
+  if (!hasRedisStorage()) {
+    cleanOldRooms();
+  }
 
   if (request.method === "GET") {
     const code = String(request.query.code || "").toUpperCase();
-    const room = rooms.get(code);
+    const room = await getRoom(code);
 
     if (!room) {
-      return sendError(response, 404, "Room not found.");
+      return sendRoomNotFound(response);
     }
 
     room.lastSeen = Date.now();
+    await saveRoom(room);
     return response.status(200).json(publicRoom(room));
   }
 
@@ -39,10 +50,10 @@ module.exports = async function handler(request, response) {
   }
 
   const code = String(body.code || "").toUpperCase();
-  const room = rooms.get(code);
+  const room = await getRoom(code);
 
   if (!room) {
-    return sendError(response, 404, "Room not found.");
+    return sendRoomNotFound(response);
   }
 
   room.lastSeen = Date.now();
@@ -63,19 +74,21 @@ module.exports = async function handler(request, response) {
     const scores = room.game.scores;
     room.game = createFreshGame();
     room.game.scores = scores;
+    await saveRoom(room);
     return response.status(200).json(publicRoom(room, body.player, body.token));
   }
 
   if (action === "resetScore") {
     room.game = createFreshGame();
+    await saveRoom(room);
     return response.status(200).json(publicRoom(room, body.player, body.token));
   }
 
   return sendError(response, 400, "Unknown room action.");
-};
+}
 
-function createRoom(response) {
-  const code = createRoomCode();
+async function createRoom(response) {
+  const code = await createRoomCode();
   const token = createToken();
   const room = {
     code,
@@ -88,19 +101,20 @@ function createRoom(response) {
     lastSeen: Date.now()
   };
 
-  rooms.set(code, room);
+  await saveRoom(room);
   return response.status(200).json(publicRoom(room, "X", token));
 }
 
-function joinRoom(response, room) {
+async function joinRoom(response, room) {
   if (!room.tokens.O) {
     room.tokens.O = createToken();
   }
 
+  await saveRoom(room);
   return response.status(200).json(publicRoom(room, "O", room.tokens.O));
 }
 
-function makeMove(response, room, body) {
+async function makeMove(response, room, body) {
   const player = body.player;
   const index = Number(body.index);
 
@@ -119,6 +133,7 @@ function makeMove(response, room, body) {
   applyMove(room.game, index);
   checkGameResult(room.game);
 
+  await saveRoom(room);
   return response.status(200).json(publicRoom(room, player, body.token));
 }
 
@@ -199,12 +214,12 @@ function isPlayer(room, player, token) {
   return (player === "X" || player === "O") && room.tokens[player] === token;
 }
 
-function createRoomCode() {
+async function createRoomCode() {
   let code = "";
 
   do {
     code = Math.random().toString(36).slice(2, 8).toUpperCase();
-  } while (rooms.has(code));
+  } while (await getRoom(code));
 
   return code;
 }
@@ -222,6 +237,71 @@ function cleanOldRooms() {
       rooms.delete(code);
     }
   }
+}
+
+async function getRoom(code) {
+  if (!code) {
+    return null;
+  }
+
+  if (hasRedisStorage()) {
+    const result = await redisCommand(["GET", roomKey(code)]);
+    return result ? JSON.parse(result) : null;
+  }
+
+  return rooms.get(code) || null;
+}
+
+async function saveRoom(room) {
+  room.lastSeen = Date.now();
+
+  if (hasRedisStorage()) {
+    await redisCommand(["SET", roomKey(room.code), JSON.stringify(room), "EX", 60 * 60 * 2]);
+    return;
+  }
+
+  rooms.set(room.code, room);
+}
+
+async function redisCommand(command) {
+  const redis = getRedisConfig();
+  const response = await fetch(redis.url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${redis.token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(command)
+  });
+  const data = await response.json();
+
+  if (!response.ok || data.error) {
+    throw new Error(data.error || "Redis request failed.");
+  }
+
+  return data.result;
+}
+
+function hasRedisStorage() {
+  const redis = getRedisConfig();
+  return Boolean(redis.url && redis.token);
+}
+
+function getRedisConfig() {
+  return {
+    url:
+      process.env.TIC_TAC_TOC_KV_REST_API_URL ||
+      process.env.UPSTASH_REDIS_REST_URL ||
+      process.env.KV_REST_API_URL,
+    token:
+      process.env.TIC_TAC_TOC_KV_REST_API_TOKEN ||
+      process.env.UPSTASH_REDIS_REST_TOKEN ||
+      process.env.KV_REST_API_TOKEN
+  };
+}
+
+function roomKey(code) {
+  return `tic-tac-toe-room:${code}`;
 }
 
 async function readBody(request) {
@@ -246,4 +326,12 @@ function sendError(response, status, message) {
   return response.status(status).json({
     error: message
   });
+}
+
+function sendRoomNotFound(response) {
+  const message = hasRedisStorage()
+    ? "Room not found. Check the code and try again."
+    : "Room not found. On Vercel, add Upstash Redis env vars so rooms do not disappear between requests.";
+
+  return sendError(response, 404, message);
 }
